@@ -1,0 +1,10 @@
+.col{
+    width: 50px;
+    height: 50px;
+    background-color:darkcyan;
+
+
+
+    outline: 2px outset #61dafb;
+    outline-offset: -1px;
+}
