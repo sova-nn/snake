@@ -19,6 +19,7 @@ export default class Snake extends React.Component {
         super(props);
         this.state = {
             grid: grid,
+            prevButton: 'ArrowRight'
         }
     }
 
@@ -28,7 +29,7 @@ export default class Snake extends React.Component {
 
     componentDidMount() {
         this.drawSnake();
-        document.addEventListener('keydown', (event) => this.onKeyPress(event));
+        document.addEventListener('keydown', (event) => this.onKeyPress(event.key));
     }
 
 
@@ -52,45 +53,86 @@ export default class Snake extends React.Component {
         this.setState({grid: newGrid})
     }
 
+    //функция для разворота змеи обратно
+    snakeRevers = () => {
+        const newGrid = this.state.grid;
+        newGrid.reverse();
+        console.log('Змея перевернулась', newGrid);
+        this.setState({grid: newGrid})
+    }
+
 
     // функиция для обработки команд клавиатуры (используем стрелки)
-    onKeyPress = (event) => {
+    // если змее нужно ползти в обратном направлении, у массива меняется порядок на обратный
+    // перед ползком идет сравнение с предыдущими координатами
+    onKeyPress = (key) => {
         let x = this.state.grid[this.state.grid.length-1][0];
         let y = this.state.grid[this.state.grid.length-1][1];
-        const keyName = event.key;
-        console.log('keydown event\n\n' + 'key: ' + keyName);
+        let prevX = this.state.grid[this.state.grid.length-2][0];
+        let prevY = this.state.grid[this.state.grid.length-2][1];
+        let lastX = this.state.grid[0][0];
+        let lastY = this.state.grid[0][1];
+        const keyName = key;
+        console.log('keydown event:   key: ' + keyName);
         switch (keyName) {
             case('ArrowDown'): {
-                y += 1;
+                if ((y+1) === prevY) {
+                    //обратный порядок змеи
+                    this.snakeRevers();
+                    y = lastY+1;
+                }
+                else y += 1;
                 break;
             }
             case('ArrowRight'): {
-                x += 1;
+                if ((x+1) === prevX) {
+                    this.snakeRevers();
+                    x = lastX+1;
+                }
+                else x += 1;
                 break;
             }
             case('ArrowLeft'): {
-                x -= 1;
+                if ((x-1) === prevX) {
+                    this.snakeRevers();
+                    x = lastX-1;
+                }
+                else x -= 1;
                 break;
             }
             case('ArrowUp'): {
-                y -= 1;
+                if ((y-1) === prevY) {
+                    this.snakeRevers();
+                    y = lastY-1;
+                }
+                else y -= 1;
                 break;
             }
+            //при нажатии остальных клавиш
             default:
-                x += 1;
+                alert ('Используйте стрелки для движения змеи');
+                return 1;
         }
         const newCoords = [x,y];
-        console.log(newCoords);
+        console.log('новая координата для ползка', newCoords);
         this.move(newCoords);
+    }
 
-
+    noneKeyPress = () => {
+        this.onKeyPress(this.state.prevButton)
     }
 
     render() {
+        {setInterval(this.noneKeyPress, 1000);
+         setTimeout(function() {
+                clearInterval(this.noneKeyPress);
+                alert( 'стоп' );
+            }, 5000);}
         return (
             <div className='snake'>
                 <canvas ref="canvas" width={500} height={500} />
-                <button onClick={this.move}>Нажми меня</button>
+
+                <button>Нажми меня</button>
             </div>
 
         );
