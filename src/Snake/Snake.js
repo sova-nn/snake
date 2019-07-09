@@ -30,6 +30,11 @@ export default class Snake extends React.Component {
     componentDidMount() {
         this.drawSnake();
         document.addEventListener('keydown', (event) => this.onKeyPress(event.key));
+        this.timer = setInterval(this.noneKeyPress, 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer);
     }
 
 
@@ -79,33 +84,50 @@ export default class Snake extends React.Component {
                 if ((y+1) === prevY) {
                     //обратный порядок змеи
                     this.snakeRevers();
+                    //записываем текущее значение кнопки для продолжения самостоятельного движения
+                    this.setState({prevButton: 'ArrowDown'});
                     y = lastY+1;
                 }
-                else y += 1;
+                else {
+                    this.setState({prevButton: 'ArrowDown'});
+                    y += 1;
+                }
                 break;
             }
             case('ArrowRight'): {
                 if ((x+1) === prevX) {
                     this.snakeRevers();
+                    this.setState({prevButton: 'ArrowRight'});
                     x = lastX+1;
                 }
-                else x += 1;
+                else {
+                    this.setState({prevButton: 'ArrowRight'});
+                    x += 1;
+                }
                 break;
             }
             case('ArrowLeft'): {
                 if ((x-1) === prevX) {
                     this.snakeRevers();
+                    this.setState({prevButton: 'ArrowLeft'});
                     x = lastX-1;
                 }
-                else x -= 1;
+                else {
+                    this.setState({prevButton: 'ArrowLeft'});
+                    x -= 1;
+                }
                 break;
             }
             case('ArrowUp'): {
                 if ((y-1) === prevY) {
                     this.snakeRevers();
+                    this.setState({prevButton: 'ArrowUp'});
                     y = lastY-1;
                 }
-                else y -= 1;
+                else {
+                    this.setState({prevButton: 'ArrowUp'});
+                    y -= 1;
+                }
                 break;
             }
             //при нажатии остальных клавиш
@@ -113,26 +135,35 @@ export default class Snake extends React.Component {
                 alert ('Используйте стрелки для движения змеи');
                 return 1;
         }
+
+        if ((x === 10) || (y === 10) || (x === -1) || (y === -1)) {
+            alert('Вы проиграли!');
+            clearInterval(this.timer);
+            return 1;
+        }
+
         const newCoords = [x,y];
         console.log('новая координата для ползка', newCoords);
         this.move(newCoords);
     }
 
+
+
     noneKeyPress = () => {
         this.onKeyPress(this.state.prevButton)
     }
 
+    //для окончания игры
+    handleClick = () => {
+        clearInterval(this.timer);
+    }
+
     render() {
-        {setInterval(this.noneKeyPress, 1000);
-         setTimeout(function() {
-                clearInterval(this.noneKeyPress);
-                alert( 'стоп' );
-            }, 5000);}
+
         return (
             <div className='snake'>
                 <canvas ref="canvas" width={500} height={500} />
-
-                <button>Нажми меня</button>
+                <button onClick={this.handleClick}>Остановить игру</button>
             </div>
 
         );
