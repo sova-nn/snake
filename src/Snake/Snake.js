@@ -42,7 +42,7 @@ export default class Snake extends React.Component {
     drawSnake() {
         const ctx = this.refs.canvas.getContext('2d');
         ctx.clearRect(0,0, 500, 500);
-        ctx.fillStyle = "burlywood";
+        ctx.fillStyle = "goldenrod";
         // отобразить "дочерние" компоненты
         this.state.grid.map((el) => {
             return rect({ctx, x: el[0]*step, y: el[1]*step, width: 50, height: 50});
@@ -148,7 +148,7 @@ export default class Snake extends React.Component {
     }
 
 
-
+    //для самостоятельного движения
     noneKeyPress = () => {
         this.onKeyPress(this.state.prevButton)
     }
