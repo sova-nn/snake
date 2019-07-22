@@ -4,31 +4,33 @@ import './apples.css';
 const step = 50;
 
 
-function rect(props) {
-    const {ctx, x, y, width, height} = props;
-    ctx.fillRect(x, y, width, height);
-}
-
 export default class Apples extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            grid: this.props.apples
-        }
-    }
+
 
     componentDidMount() {
-        this.drawApples();
+        this.drawApples(this.props.apples);
     }
 
-    drawApples() {
+    componentDidUpdate() {
+        this.drawApples(this.props.apples);
+    }
+
+
+    rect(params) {
+        const {ctx, x, y, width, height} = params;
+        ctx.fillRect(x, y, width, height);
+    }
+
+    drawApples = (apples) => {
+
         const ctx = this.refs.canvas.getContext('2d');
         ctx.clearRect(0,0, 500, 500);
         ctx.fillStyle = "orchid";
         // отобразить "дочерние" компоненты
-        this.state.grid.map((el) => {
-            return rect({ctx, x: el[0]*step, y: el[1]*step, width: 50, height: 50});
+        apples.map((el) => {
+            return this.rect({ctx, x: el[0]*step, y: el[1]*step, width: 50, height: 50});
         });
+        console.log('Это сейчас в яблоках', this.props.apples);
     }
 
 
@@ -36,8 +38,9 @@ export default class Apples extends React.Component {
     render() {
 
         return (
+
             <div className='apples'>
-                <canvas ref="canvas" width={500} height={500} />
+                <canvas ref="canvas" width={500} height={500}/>
             </div>
 
         );

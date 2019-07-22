@@ -19,7 +19,8 @@ export default class Snake extends React.Component {
         super(props);
         this.state = {
             grid: grid,
-            prevButton: 'ArrowRight'
+            prevButton: 'ArrowRight',
+            eat: false
         }
     }
 
@@ -39,6 +40,7 @@ export default class Snake extends React.Component {
 
 
 
+    //отображаем змею на основе state
     drawSnake() {
         const ctx = this.refs.canvas.getContext('2d');
         ctx.clearRect(0,0, 500, 500);
@@ -56,6 +58,14 @@ export default class Snake extends React.Component {
         newGrid.splice(0,1);
         console.log(newGrid);
         this.setState({grid: newGrid})
+    }
+
+    //функция для удлиннения змеи
+    makeTheSnakeLonger = (newStepCoords) => {
+        const newGrid = this.state.grid;
+        newGrid.splice(newGrid.length,0, newStepCoords);
+        console.log('Змея изменилась', newGrid);
+        this.setState({grid: newGrid, eat: false})
     }
 
     //функция для разворота змеи обратно
@@ -144,8 +154,10 @@ export default class Snake extends React.Component {
 
         const newCoords = [x,y];
         console.log('новая координата для ползка', newCoords);
-        this.move(newCoords);
+        (this.state.eat)?this.makeTheSnakeLonger(newCoords):this.move(newCoords);
     }
+
+
 
 
     //для самостоятельного движения
@@ -158,12 +170,18 @@ export default class Snake extends React.Component {
         clearInterval(this.timer);
     }
 
+    handleClickSnake = () => {
+        this.setState({eat:true})
+    }
+
     render() {
 
         return (
             <div className='snake'>
                 <canvas ref="canvas" width={500} height={500} />
                 <button onClick={this.handleClick}>Остановить игру</button>
+                <button onClick={this.handleClickSnake}>Удлиннить змею</button>
+
             </div>
 
         );
