@@ -38,7 +38,6 @@ export default class Apples extends React.Component {
     render() {
 
         return (
-
             <div className='apples'>
                 <canvas ref="canvas" width={500} height={500}/>
             </div>
