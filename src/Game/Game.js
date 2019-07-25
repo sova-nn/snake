@@ -7,9 +7,6 @@ import Snake from "../Snake/Snake";
 import Apples from "../Apples/Apples";
 
 
-
-
-
 export default class Game extends React.Component{
     constructor(props){
         super(props);
@@ -33,17 +30,16 @@ export default class Game extends React.Component{
     }
 
 
-
     componentDidMount() {
-        document.addEventListener('keydown', (event) => this.onKeyPress(event.key));
-        this.timer = setInterval(this.noneKeyPress, 1000);
+        document.addEventListener('keydown', (event) => this.snakeMove(event.key));
+        this.timer = setInterval(this.snakeMove, 1000);
     }
 
     componentWillUnmount() {
         clearInterval(this.timer);
     }
 
-    //само движение - удаляем первый элемент массива, увеличиваем последний
+    //изменение state змеи - удаляем первый элемент массива, увеличиваем последний
     move = (newStepCoords) => {
         const newGrid = this.state.snake;
         newGrid.splice(newGrid.length,0, newStepCoords);
@@ -68,10 +64,11 @@ export default class Game extends React.Component{
         this.setState({snake: newGrid})
     }
 
-    // функиция для обработки команд клавиатуры (используем стрелки)
+    // функиция для расчета координат на основе нажатой стрелки или (если стрелка не нажата) на основе state.prevButton
     // если змее нужно ползти в обратном направлении, у массива меняется порядок на обратный
     // перед ползком идет сравнение с предыдущими координатами
-    onKeyPress = (key) => {
+    // если не нажато ничего, считаем, что нажата предыдущая стрелка
+    nextCoords = (key) => {
         let x = this.state.snake[this.state.snake.length-1][0];
         let y = this.state.snake[this.state.snake.length-1][1];
         let prevX = this.state.snake[this.state.snake.length-2][0];
@@ -133,12 +130,26 @@ export default class Game extends React.Component{
 
         const newCoords = [x,y];
         console.log('новая координата для ползка', newCoords);
-        (this.state.eat)?this.makeTheSnakeLonger(newCoords):this.move(newCoords);
+
+        //проверяем, нет ли рядом яблока, если есть, выставляем флаг
+        this.whereIsAnApple(newCoords);
+
+        return newCoords;
     }
 
-    //для самостоятельного движения
-    noneKeyPress = () => {
-        this.onKeyPress(this.state.prevButton)
+    //функция для итогового движения змеи
+    snakeMove = (key) => {
+        const coords = this.nextCoords(key || this.state.prevButton);
+        (this.state.eat)&&this.deleteTheApple(coords);
+        (this.state.eat)?this.makeTheSnakeLonger(coords):this.move(coords);
+    }
+
+    deleteTheApple = (apple) => {
+        let newApples = this.state.apples;
+        let newApplesMod = _.reject(newApples, (arr) => { return ((arr[0] === apple[0]) && (arr[1] === apple[1]))});
+        console.log('Удаляем яблоко', newApplesMod);
+
+        this.setState({apples: newApplesMod});
     }
 
     //для окончания игры
@@ -146,17 +157,10 @@ export default class Game extends React.Component{
         clearInterval(this.timer);
     }
 
-    //удлинняем змею - перенести функцию в Game
-    handleClickSnake = () => {
-        this.setState({eat:true})
-    }
-
-    deleteTheApple = () => {
-        let apple = [5,5];
-        let newApples = this.state.apples;
-        let newApplesMod = _.reject(newApples, (arr) => { return ((arr[0] === apple[0]) && (arr[1] === apple[1]))});
-        console.log('Удаляем яблоко', newApplesMod);
-        this.setState({apples: newApplesMod});
+    whereIsAnApple = (head) => {
+        const apples = this.state.apples;
+        const res = apples.map(apple => ((_.isEqual(apple,head)) && this.setState({eat:true})));
+        console.log(res);
     }
 
 
@@ -168,9 +172,7 @@ export default class Game extends React.Component{
                 <GameTable field={this.state.field}/>
 
                 <button onClick={this.deleteTheApple}>Съесть яблоко</button>
-                <br/>
                 <button onClick={this.handleClick}>Остановить игру</button>
-                <button onClick={this.handleClickSnake}>Удлиннить змею</button>
             </div>
         );
     }
