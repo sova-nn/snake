@@ -30,7 +30,6 @@ export default class Apples extends React.Component {
         apples.map((el) => {
             return this.rect({ctx, x: el[0]*step, y: el[1]*step, width: 50, height: 50});
         });
-        console.log('Это сейчас в яблоках', this.props.apples);
     }
 
 

@@ -1,11 +1,11 @@
 import _ from 'underscore';
 import React from 'react';
 
-
 import GameTable from '../GameTable/GameTable';
 import Snake from "../Snake/Snake";
 import Apples from "../Apples/Apples";
 
+const BOX_SIZE = 10;
 
 export default class Game extends React.Component{
     constructor(props){
@@ -23,16 +23,15 @@ export default class Game extends React.Component{
                 [7,7],
                 [3,8]
             ],
-            field: Array(10).fill(Array(10).fill(0)),
+            field: Array(BOX_SIZE).fill(Array(BOX_SIZE).fill(0)),
             prevButton: 'ArrowRight',
             eat: false
         };
     }
 
-
     componentDidMount() {
         document.addEventListener('keydown', (event) => this.snakeMove(event.key));
-        this.timer = setInterval(this.snakeMove, 1000);
+        this.timer = setInterval(this.snakeMove, 900);
     }
 
     componentWillUnmount() {
@@ -44,7 +43,6 @@ export default class Game extends React.Component{
         const newGrid = this.state.snake;
         newGrid.splice(newGrid.length,0, newStepCoords);
         newGrid.splice(0,1);
-        console.log(newGrid);
         this.setState({snake: newGrid})
     }
 
@@ -52,7 +50,6 @@ export default class Game extends React.Component{
     makeTheSnakeLonger = (newStepCoords) => {
         const newGrid = this.state.snake;
         newGrid.splice(newGrid.length,0, newStepCoords);
-        console.log('Змея изменилась', newGrid);
         this.setState({snake: newGrid, eat: false})
     }
 
@@ -60,7 +57,6 @@ export default class Game extends React.Component{
     snakeRevers = () => {
         const newGrid = this.state.snake;
         newGrid.reverse();
-        console.log('Змея перевернулась', newGrid);
         this.setState({snake: newGrid})
     }
 
@@ -129,7 +125,6 @@ export default class Game extends React.Component{
         }
 
         const newCoords = [x,y];
-        console.log('новая координата для ползка', newCoords);
 
         //проверяем, нет ли рядом яблока, если есть, выставляем флаг
         this.whereIsAnApple(newCoords);
@@ -144,10 +139,10 @@ export default class Game extends React.Component{
         (this.state.eat)?this.makeTheSnakeLonger(coords):this.move(coords);
     }
 
+    //удаляем яблоко из массива при съедении
     deleteTheApple = (apple) => {
         let newApples = this.state.apples;
         let newApplesMod = _.reject(newApples, (arr) => { return ((arr[0] === apple[0]) && (arr[1] === apple[1]))});
-        console.log('Удаляем яблоко', newApplesMod);
 
         this.setState({apples: newApplesMod});
     }
@@ -159,20 +154,25 @@ export default class Game extends React.Component{
 
     whereIsAnApple = (head) => {
         const apples = this.state.apples;
-        const res = apples.map(apple => ((_.isEqual(apple,head)) && this.setState({eat:true})));
-        console.log(res);
+        apples.map(apple => ((_.isEqual(apple,head)) && this.setState({eat:true})));
     }
 
 
     render() {
+
         return(
             <div>
                 <Snake snake={this.state.snake}/>
                 <Apples apples={this.state.apples}/>
                 <GameTable field={this.state.field}/>
 
-                <button onClick={this.deleteTheApple}>Съесть яблоко</button>
                 <button onClick={this.handleClick}>Остановить игру</button>
+
+                <div>
+                    {(_.isEmpty(this.state.apples)) && (
+                        <div>Вы выиграли, поздравляем!</div>
+                    )}
+                </div>
             </div>
         );
     }
