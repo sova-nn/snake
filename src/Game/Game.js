@@ -30,12 +30,13 @@ export default class Game extends React.Component{
     }
 
     componentDidMount() {
-        document.addEventListener('keydown', (event) => this.snakeMove(event.key));
+        window.addEventListener('keydown', (event) => this.snakeMove(event.key));
         this.timer = setInterval(this.snakeMove, 900);
     }
 
     componentWillUnmount() {
         clearInterval(this.timer);
+        window.removeEventListener('keydown', this.snakeMove);
     }
 
     //изменение state змеи - удаляем первый элемент массива, увеличиваем последний
@@ -135,6 +136,7 @@ export default class Game extends React.Component{
     //функция для итогового движения змеи
     snakeMove = (key) => {
         const coords = this.nextCoords(key || this.state.prevButton);
+        console.log(coords);
         (this.state.eat)&&this.deleteTheApple(coords);
         (this.state.eat)?this.makeTheSnakeLonger(coords):this.move(coords);
     }
